@@ -146,7 +146,7 @@ select {
 }
 
 .hero-grid::after {
-  content: "S2S / S2T\A 中英双向\A 9 款产品";
+  content: "语音同传 / 字幕同传\A 中英双向\A 9 款产品";
   white-space: pre-line;
   align-self: center;
   justify-self: end;
@@ -658,51 +658,70 @@ h3 {
 }
 
 .performance-matrix {
-  display: grid;
-  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.matrix-table {
+  min-width: 980px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: rgba(251, 250, 247, 0.96);
 }
 
 .matrix-row {
   display: grid;
-  grid-template-columns: minmax(150px, 1.25fr) repeat(6, minmax(105px, 1fr));
-  gap: 8px;
+  grid-template-columns: minmax(180px, 1.35fr) repeat(6, minmax(118px, 1fr));
   align-items: stretch;
 }
 
+.matrix-row + .matrix-row {
+  border-top: 1px solid rgba(222, 215, 203, 0.9);
+}
+
 .matrix-header {
-  color: var(--muted);
-  font-size: 0.74rem;
-  font-weight: 820;
-  padding: 0 0 2px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #eee8de;
+  color: var(--soft-ink);
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
 }
 
 .matrix-header div {
-  padding: 0 8px;
+  min-height: 44px;
+  padding: 11px 12px;
+  border-left: 1px solid rgba(200, 192, 180, 0.62);
+}
+
+.matrix-header div:first-child {
+  border-left: 0;
 }
 
 .matrix-product,
 .matrix-cell {
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  padding: 10px;
-  min-height: 78px;
-  background: #f8f5ef;
+  min-height: 82px;
+  padding: 12px;
+  border-left: 1px solid rgba(222, 215, 203, 0.82);
 }
 
 .matrix-product {
-  background: rgba(251, 250, 247, 0.96);
+  border-left: 0;
+  background: rgba(251, 250, 247, 0.98);
 }
 
 .matrix-product strong {
   display: block;
   font-family: var(--serif);
-  font-size: 1.02rem;
+  font-size: 1.04rem;
+  line-height: 1.35;
 }
 
 .matrix-product span,
-.matrix-product p,
-.matrix-cell small,
-.matrix-cell span {
+.matrix-product p {
   display: block;
   color: var(--muted);
   font-size: 0.76rem;
@@ -714,47 +733,84 @@ h3 {
 }
 
 .matrix-cell {
-  position: relative;
-  overflow: hidden;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  color: var(--soft-ink);
 }
 
-.matrix-cell::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.92;
-  z-index: 0;
+.matrix-cell.high {
+  background: linear-gradient(90deg, rgba(61, 119, 86, 0.18), rgba(40, 125, 120, 0.09));
 }
 
-.matrix-cell.high::before {
-  background: linear-gradient(135deg, rgba(61, 119, 86, 0.22), rgba(40, 125, 120, 0.14));
+.matrix-cell.mid {
+  background: linear-gradient(90deg, rgba(169, 123, 45, 0.16), rgba(183, 101, 76, 0.07));
 }
 
-.matrix-cell.mid::before {
-  background: linear-gradient(135deg, rgba(169, 123, 45, 0.2), rgba(183, 101, 76, 0.1));
+.matrix-cell.low {
+  background: rgba(114, 122, 134, 0.09);
 }
 
-.matrix-cell.low::before {
-  background: rgba(114, 122, 134, 0.1);
+.metric-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.matrix-cell small,
-.matrix-cell strong,
-.matrix-cell span {
-  position: relative;
-  z-index: 1;
-}
-
-.matrix-cell strong {
-  display: block;
-  margin: 4px 0 1px;
+.metric-main strong {
   color: var(--ink);
-  font-size: 1.08rem;
+  font-size: 1.06rem;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 
-.matrix-cell span {
+.level-label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 780;
+  white-space: nowrap;
+}
+
+.meter {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(23, 32, 46, 0.1);
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.matrix-cell.high .meter span {
+  background: var(--green);
+}
+
+.matrix-cell.mid .meter span {
+  background: var(--ochre);
+}
+
+.matrix-cell.low .meter span {
+  background: var(--muted);
+}
+
+.metric-note {
+  color: var(--muted);
+  font-size: 0.74rem;
   line-height: 1.35;
+}
+
+.clone-status {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 3px 9px;
+  color: var(--ink);
+  background: rgba(251, 250, 247, 0.62);
+  font-size: 0.88rem;
+  font-weight: 820;
 }
 
 .segmented {
@@ -985,18 +1041,6 @@ h3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .matrix-row {
-    grid-template-columns: minmax(150px, 1.2fr) repeat(3, minmax(105px, 1fr));
-  }
-
-  .matrix-header {
-    display: none;
-  }
-
-  .matrix-cell small {
-    color: rgba(63, 71, 85, 0.92);
-  }
-
   .split {
     display: grid;
     align-items: start;
@@ -1051,17 +1095,63 @@ h3 {
     flex-direction: column;
   }
 
+  .performance-matrix {
+    overflow: visible;
+  }
+
+  .matrix-table {
+    min-width: 0;
+    display: grid;
+    gap: 12px;
+    border: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
+  .matrix-header {
+    display: none;
+  }
+
   .matrix-row {
     grid-template-columns: 1fr;
-    padding: 12px;
+    gap: 0;
+    padding: 0;
     border: 1px solid var(--hairline);
     border-radius: var(--radius);
     background: rgba(251, 250, 247, 0.8);
+    overflow: hidden;
+  }
+
+  .matrix-row + .matrix-row {
+    border-top: 1px solid var(--hairline);
   }
 
   .matrix-product,
   .matrix-cell {
     min-height: auto;
+    border-left: 0;
+  }
+
+  .matrix-cell {
+    grid-template-columns: 96px minmax(0, 1fr);
+    align-items: center;
+    border-top: 1px solid rgba(222, 215, 203, 0.82);
+  }
+
+  .matrix-cell::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 820;
+  }
+
+  .matrix-cell .meter,
+  .matrix-cell .metric-note {
+    grid-column: 2;
+  }
+
+  .clone-status {
+    width: max-content;
   }
 
   .controls,

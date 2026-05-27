@@ -286,12 +286,27 @@ function latencyLevel(value, best, worst) {
   return "low";
 }
 
-function heatCell({ label, value, level, note }) {
+function levelText(level) {
+  if (level === "high") return "强";
+  if (level === "mid") return "中";
+  return "弱";
+}
+
+function meterWidth(level) {
+  if (level === "high") return 100;
+  if (level === "mid") return 66;
+  return 34;
+}
+
+function metricCell({ label, value, level, note }) {
   return `
-    <div class="matrix-cell ${level}">
-      <small>${label}</small>
-      <strong>${value}</strong>
-      ${note ? `<span>${note}</span>` : ""}
+    <div class="matrix-cell ${level}" data-label="${label}" role="cell">
+      <div class="metric-main">
+        <strong>${value}</strong>
+        <span class="level-label">${levelText(level)}</span>
+      </div>
+      <div class="meter" aria-hidden="true"><span style="width:${meterWidth(level)}%"></span></div>
+      ${note ? `<span class="metric-note">${note}</span>` : ""}
     </div>
   `;
 }
@@ -369,42 +384,46 @@ function renderScores() {
   }));
 
   document.querySelector("#performanceMatrix").innerHTML = `
-    <div class="matrix-row matrix-header">
-      <div>产品</div>
-      <div>字幕准确</div>
-      <div>语音准确</div>
-      <div>音色自然</div>
-      <div>字幕时延</div>
-      <div>语音时延</div>
-      <div>音色克隆</div>
+    <div class="matrix-table" role="table" aria-label="产品表现矩阵">
+      <div class="matrix-row matrix-header" role="row">
+        <div role="columnheader">产品</div>
+        <div role="columnheader">字幕准确</div>
+        <div role="columnheader">语音准确</div>
+        <div role="columnheader">音色自然</div>
+        <div role="columnheader">字幕时延</div>
+        <div role="columnheader">语音时延</div>
+        <div role="columnheader">音色克隆</div>
+      </div>
+      ${rows
+      .map(
+        (row) => {
+          const total = (row.caption || 0) + (row.voice || 0) + (row.toneScore || 0);
+          const captionLatencyText = row.captionLatency === null ? "不涉及" : `${row.captionLatency}s`;
+          const voiceLatencyText = row.voiceLatency === null ? "不涉及" : `${row.voiceLatency}s`;
+          const cloneLevel = row.clone ? "high" : "low";
+          return `
+            <article class="matrix-row" role="row">
+              <div class="matrix-product" role="cell">
+                <strong>${row.product}</strong>
+                <span>核心评分 ${total}/15</span>
+                ${row.detail ? `<p>${row.detail}</p>` : ""}
+              </div>
+              ${metricCell({ label: "字幕准确", value: row.caption === null ? "不涉及" : `${row.caption}/5`, level: scoreLevel(row.caption), note: row.caption === null ? "未纳入该项" : "信息准确度" })}
+              ${metricCell({ label: "语音准确", value: row.voice === null ? "不涉及" : `${row.voice}/5`, level: scoreLevel(row.voice), note: row.voice === null ? "未纳入该项" : "信息准确度" })}
+              ${metricCell({ label: "音色自然", value: row.toneScore === null ? "不涉及" : `${row.toneScore}/5`, level: scoreLevel(row.toneScore), note: row.tone.replaceAll("\n", " · ") })}
+              ${metricCell({ label: "字幕时延", value: captionLatencyText, level: latencyLevel(row.captionLatency, bestCaption, worstCaption), note: row.captionLatency === bestCaption ? "最低" : "越低越好" })}
+              ${metricCell({ label: "语音时延", value: voiceLatencyText, level: latencyLevel(row.voiceLatency, bestVoice, worstVoice), note: row.voiceLatency === bestVoice ? "最低" : row.voiceLatency === null ? "未纳入该项" : "越低越好" })}
+              <div class="matrix-cell ${cloneLevel}" data-label="音色克隆" role="cell">
+                <span class="clone-status">${row.clone ? "支持" : "不支持"}</span>
+                <div class="meter" aria-hidden="true"><span style="width:${meterWidth(cloneLevel)}%"></span></div>
+                <span class="metric-note">${row.clone ? "可用于语音同传" : "无音色克隆能力"}</span>
+              </div>
+            </article>
+          `;
+        }
+      )
+      .join("")}
     </div>
-    ${rows
-    .map(
-      (row) => {
-        const total = (row.caption || 0) + (row.voice || 0) + (row.toneScore || 0);
-        const captionLatencyText = row.captionLatency === null ? "不涉及" : `${row.captionLatency}s`;
-        const voiceLatencyText = row.voiceLatency === null ? "不涉及" : `${row.voiceLatency}s`;
-        return `
-          <article class="matrix-row">
-            <div class="matrix-product">
-              <strong>${row.product}</strong>
-              <span>综合参考 ${total}/15</span>
-              ${row.detail ? `<p>${row.detail}</p>` : ""}
-            </div>
-            ${heatCell({ label: "字幕准确", value: row.caption === null ? "不涉及" : `${row.caption}/5`, level: scoreLevel(row.caption), note: row.caption === null ? "" : "信息准确度" })}
-            ${heatCell({ label: "语音准确", value: row.voice === null ? "不涉及" : `${row.voice}/5`, level: scoreLevel(row.voice), note: row.voice === null ? "" : "信息准确度" })}
-            ${heatCell({ label: "音色自然", value: row.toneScore === null ? "不涉及" : `${row.toneScore}/5`, level: scoreLevel(row.toneScore), note: row.tone.replaceAll("\n", " · ") })}
-            ${heatCell({ label: "字幕时延", value: captionLatencyText, level: latencyLevel(row.captionLatency, bestCaption, worstCaption), note: row.captionLatency === bestCaption ? "最低" : "" })}
-            ${heatCell({ label: "语音时延", value: voiceLatencyText, level: latencyLevel(row.voiceLatency, bestVoice, worstVoice), note: row.voiceLatency === bestVoice ? "最低" : "" })}
-            <div class="matrix-cell clone ${row.clone ? "high" : "low"}">
-              <small>音色克隆</small>
-              <strong>${row.clone ? "支持" : "不支持"}</strong>
-            </div>
-          </article>
-        `;
-      }
-    )
-    .join("")}
   `;
 }
 
