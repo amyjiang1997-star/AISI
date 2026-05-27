@@ -36,7 +36,27 @@
               <a class="button ghost" href="#scenarios">查看场景评测</a>
             </div>
           </div>
-
+          <aside class="hero-visual" aria-label="评测概览">
+            <div class="signal-card primary-signal">
+              <span class="signal-label">Coverage</span>
+              <strong>9</strong>
+              <span>款产品横向比较</span>
+            </div>
+            <div class="signal-card">
+              <span class="signal-label">Scenes</span>
+              <strong>2</strong>
+              <span>会议 / 通用场景</span>
+            </div>
+            <div class="signal-card wide">
+              <span class="signal-label">Dimensions</span>
+              <div class="signal-stack">
+                <span>信息准确度</span>
+                <span>音色自然度</span>
+                <span>同传时延</span>
+                <span>语对覆盖</span>
+              </div>
+            </div>
+          </aside>
         </div>
       </header>
 
@@ -101,8 +121,8 @@
         <section class="section performance-section" id="performance">
           <div class="section-head">
             <p class="eyebrow">Performance</p>
-            <h2>评测结论：多维度对比</h2>
-            <p>把准确度、音色、时延和音色克隆放到同一个矩阵中比较，颜色越深代表表现越好；时延维度按秒数反向计算，越低越好。</p>
+            <h2>表现速览：先看结论，再看明细</h2>
+            <p>将准确度、音色、时延和音色克隆拆成可聚焦的视图。每张产品卡保留完整指标，排序会随当前关注维度变化。</p>
           </div>
 
           <div class="dimension-summary" aria-label="各维度领先产品">
@@ -128,16 +148,21 @@
             </article>
           </div>
 
-          <div class="matrix-card">
-            <div class="matrix-toolbar">
-              <h3>产品表现矩阵</h3>
-              <div class="matrix-legend">
-                <span><i class="legend-high"></i>强</span>
-                <span><i class="legend-mid"></i>中</span>
-                <span><i class="legend-low"></i>弱 / 不涉及</span>
+          <div class="performance-panel">
+            <div class="performance-toolbar">
+              <div>
+                <h3>产品表现速览</h3>
+                <p>切换关注维度后，优先展示该维度下最值得看的产品。</p>
+              </div>
+              <div class="segmented performance-tabs" role="tablist" aria-label="表现维度切换">
+                <button class="active" type="button" data-performance-view="overall">综合</button>
+                <button type="button" data-performance-view="accuracy">准确度</button>
+                <button type="button" data-performance-view="latency">时延</button>
+                <button type="button" data-performance-view="voice">音色</button>
               </div>
             </div>
-            <div id="performanceMatrix" class="performance-matrix"></div>
+            <div id="performanceLead" class="performance-lead"></div>
+            <div id="performanceMatrix" class="performance-cards"></div>
           </div>
         </section>
 

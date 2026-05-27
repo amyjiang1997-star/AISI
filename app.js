@@ -298,19 +298,6 @@ function meterWidth(level) {
   return 34;
 }
 
-function metricCell({ label, value, level, note }) {
-  return `
-    <div class="matrix-cell ${level}" data-label="${label}" role="cell">
-      <div class="metric-main">
-        <strong>${value}</strong>
-        <span class="level-label">${levelText(level)}</span>
-      </div>
-      <div class="meter" aria-hidden="true"><span style="width:${meterWidth(level)}%"></span></div>
-      ${note ? `<span class="metric-note">${note}</span>` : ""}
-    </div>
-  `;
-}
-
 function renderProducts() {
   const query = document.querySelector("#productSearch").value.trim().toLowerCase();
   const filter = document.querySelector("#capabilityFilter").value;
@@ -324,12 +311,19 @@ function renderProducts() {
     return matchesQuery && matchesFilter;
   });
 
-  document.querySelector("#productGrid").innerHTML = filtered
+  const productGrid = document.querySelector("#productGrid");
+  if (!filtered.length) {
+    productGrid.innerHTML = '<p class="empty-state">没有找到匹配的产品，请调整搜索词或筛选条件。</p>';
+    return;
+  }
+
+  productGrid.innerHTML = filtered
     .map(
-      (product) => `
+      (product, index) => `
         <article class="product-card ${product.name === "飞书 AI 同传" ? "featured" : ""}">
           <div class="product-top">
             <div>
+              <span class="product-index">${String(index + 1).padStart(2, "0")}</span>
               <div class="product-name">${product.name}</div>
               <small>${product.office ? "办公应用" : "通用 / 专用工具"}</small>
             </div>
@@ -343,6 +337,10 @@ function renderProducts() {
           <div class="language-bars" aria-label="${product.name} 语对覆盖">
             ${languageBar("语音", product.voicePairs, maxVoicePairs)}
             ${languageBar("字幕", product.captionPairs, maxCaptionPairs)}
+          </div>
+          <div class="product-stats" aria-label="${product.name} 语对数量">
+            <span><strong>${product.voicePairs}</strong> 语音语对</span>
+            <span><strong>${product.captionPairs}</strong> 字幕语对</span>
           </div>
           ${
             product.pricingImage
@@ -377,54 +375,131 @@ function renderScores() {
   const worstCaption = Math.max(...captionLatencies);
   const bestVoice = Math.min(...voiceLatencies);
   const worstVoice = Math.max(...voiceLatencies);
-  const rows = scores.map((row) => ({
-    ...row,
-    captionLatency: latencyValue(row.product, "caption"),
-    voiceLatency: latencyValue(row.product, "voice"),
-  }));
+  const currentView = document.querySelector(".performance-tabs .active")?.dataset.performanceView || "overall";
+  const rows = scores.map((row) => {
+    const captionLatency = latencyValue(row.product, "caption");
+    const voiceLatency = latencyValue(row.product, "voice");
+    const coreTotal = (row.caption || 0) + (row.voice || 0) + (row.toneScore || 0);
+    const accuracyTotal = (row.caption || 0) + (row.voice || 0);
+    const latencyAverage =
+      captionLatency !== null && voiceLatency !== null
+        ? (captionLatency + voiceLatency) / 2
+        : captionLatency || voiceLatency || 99;
+    const hasBothLatencies = captionLatency !== null && voiceLatency !== null;
+    return {
+      ...row,
+      captionLatency,
+      voiceLatency,
+      coreTotal,
+      accuracyTotal,
+      latencyAverage,
+      hasBothLatencies,
+      captionLatencyLevel: latencyLevel(captionLatency, bestCaption, worstCaption),
+      voiceLatencyLevel: latencyLevel(voiceLatency, bestVoice, worstVoice),
+    };
+  });
+
+  const sortedRows = [...rows].sort((a, b) => {
+    if (currentView === "accuracy") return b.accuracyTotal - a.accuracyTotal || b.coreTotal - a.coreTotal;
+    if (currentView === "latency") return Number(b.hasBothLatencies) - Number(a.hasBothLatencies) || a.latencyAverage - b.latencyAverage;
+    if (currentView === "voice") return (b.toneScore || 0) - (a.toneScore || 0) || Number(b.clone) - Number(a.clone);
+    return b.coreTotal - a.coreTotal || a.latencyAverage - b.latencyAverage;
+  });
+
+  const viewMeta = {
+    overall: ["综合视图", "按核心评分优先排序，同时保留时延和音色克隆信息。"],
+    accuracy: ["准确度视图", "优先看字幕和语音同传信息准确度，适合判断译文可靠性。"],
+    latency: ["时延视图", "优先看同时具备字幕和语音时延数据的产品，秒数越低越适合实时会议。"],
+    voice: ["音色视图", "优先看语音同传音色自然度和音色克隆能力。"],
+  };
+
+  document.querySelector("#performanceLead").innerHTML = sortedRows
+    .slice(0, 3)
+    .map(
+      (row, index) => `
+        <article class="lead-rank-card ${index === 0 ? "top" : ""}">
+          <span class="rank-index">0${index + 1}</span>
+          <div>
+            <strong>${row.product}</strong>
+            <p>${performanceSummary(row, currentView)}</p>
+          </div>
+        </article>
+      `
+    )
+    .join("");
 
   document.querySelector("#performanceMatrix").innerHTML = `
-    <div class="matrix-table" role="table" aria-label="产品表现矩阵">
-      <div class="matrix-row matrix-header" role="row">
-        <div role="columnheader">产品</div>
-        <div role="columnheader">字幕准确</div>
-        <div role="columnheader">语音准确</div>
-        <div role="columnheader">音色自然</div>
-        <div role="columnheader">字幕时延</div>
-        <div role="columnheader">语音时延</div>
-        <div role="columnheader">音色克隆</div>
+    <div class="performance-view-note">
+      <strong>${viewMeta[currentView][0]}</strong>
+      <span>${viewMeta[currentView][1]}</span>
+    </div>
+    ${sortedRows.map((row) => performanceCard(row, currentView)).join("")}
+  `;
+}
+
+function performanceSummary(row, view) {
+  if (view === "accuracy") return `字幕 ${valueOrNA(row.caption, "/5")} · 语音 ${valueOrNA(row.voice, "/5")}`;
+  if (view === "latency") return `字幕 ${secondsOrNA(row.captionLatency)} · 语音 ${secondsOrNA(row.voiceLatency)}`;
+  if (view === "voice") return `音色 ${valueOrNA(row.toneScore, "/5")} · 音色克隆${row.clone ? "支持" : "不支持"}`;
+  return `核心评分 ${row.coreTotal}/15 · 字幕时延 ${secondsOrNA(row.captionLatency)}`;
+}
+
+function performanceCard(row, view) {
+  return `
+    <article class="performance-card ${row.product === "飞书 AI 同传" ? "featured" : ""}" data-view="${view}">
+      <div class="performance-card-head">
+        <div>
+          <span>${view === "overall" ? "综合排序" : "当前维度排序"}</span>
+          <h4>${row.product}</h4>
+        </div>
+        <strong>${row.coreTotal}<small>/15</small></strong>
       </div>
-      ${rows
-      .map(
-        (row) => {
-          const total = (row.caption || 0) + (row.voice || 0) + (row.toneScore || 0);
-          const captionLatencyText = row.captionLatency === null ? "不涉及" : `${row.captionLatency}s`;
-          const voiceLatencyText = row.voiceLatency === null ? "不涉及" : `${row.voiceLatency}s`;
-          const cloneLevel = row.clone ? "high" : "low";
-          return `
-            <article class="matrix-row" role="row">
-              <div class="matrix-product" role="cell">
-                <strong>${row.product}</strong>
-                <span>核心评分 ${total}/15</span>
-                ${row.detail ? `<p>${row.detail}</p>` : ""}
-              </div>
-              ${metricCell({ label: "字幕准确", value: row.caption === null ? "不涉及" : `${row.caption}/5`, level: scoreLevel(row.caption), note: row.caption === null ? "未纳入该项" : "信息准确度" })}
-              ${metricCell({ label: "语音准确", value: row.voice === null ? "不涉及" : `${row.voice}/5`, level: scoreLevel(row.voice), note: row.voice === null ? "未纳入该项" : "信息准确度" })}
-              ${metricCell({ label: "音色自然", value: row.toneScore === null ? "不涉及" : `${row.toneScore}/5`, level: scoreLevel(row.toneScore), note: row.tone.replaceAll("\n", " · ") })}
-              ${metricCell({ label: "字幕时延", value: captionLatencyText, level: latencyLevel(row.captionLatency, bestCaption, worstCaption), note: row.captionLatency === bestCaption ? "最低" : "越低越好" })}
-              ${metricCell({ label: "语音时延", value: voiceLatencyText, level: latencyLevel(row.voiceLatency, bestVoice, worstVoice), note: row.voiceLatency === bestVoice ? "最低" : row.voiceLatency === null ? "未纳入该项" : "越低越好" })}
-              <div class="matrix-cell ${cloneLevel}" data-label="音色克隆" role="cell">
-                <span class="clone-status">${row.clone ? "支持" : "不支持"}</span>
-                <div class="meter" aria-hidden="true"><span style="width:${meterWidth(cloneLevel)}%"></span></div>
-                <span class="metric-note">${row.clone ? "可用于语音同传" : "无音色克隆能力"}</span>
-              </div>
-            </article>
-          `;
-        }
-      )
-      .join("")}
+      <div class="metric-strip" aria-label="${row.product} 核心指标">
+        ${scorePill("字幕准确", row.caption, scoreLevel(row.caption), "/5")}
+        ${scorePill("语音准确", row.voice, scoreLevel(row.voice), "/5")}
+        ${scorePill("音色", row.toneScore, scoreLevel(row.toneScore), "/5")}
+        ${latencyPill("字幕时延", row.captionLatency, row.captionLatencyLevel)}
+        ${latencyPill("语音时延", row.voiceLatency, row.voiceLatencyLevel)}
+        ${clonePill(row.clone)}
+      </div>
+      ${row.detail ? `<p class="performance-detail">${row.detail}</p>` : ""}
+    </article>
+  `;
+}
+
+function scorePill(label, value, level, suffix) {
+  return `
+    <div class="metric-pill ${level}">
+      <span>${label}</span>
+      <strong>${valueOrNA(value, suffix)}</strong>
     </div>
   `;
+}
+
+function latencyPill(label, value, level) {
+  return `
+    <div class="metric-pill ${level}">
+      <span>${label}</span>
+      <strong>${secondsOrNA(value)}</strong>
+    </div>
+  `;
+}
+
+function clonePill(clone) {
+  return `
+    <div class="metric-pill ${clone ? "high" : "low"}">
+      <span>音色克隆</span>
+      <strong>${clone ? "支持" : "不支持"}</strong>
+    </div>
+  `;
+}
+
+function valueOrNA(value, suffix) {
+  return value === null ? "不涉及" : `${value}${suffix}`;
+}
+
+function secondsOrNA(value) {
+  return value === null ? "不涉及" : `${value}s`;
 }
 
 let currentScene = "meeting";
@@ -478,6 +553,14 @@ document.querySelectorAll("[data-scene]").forEach((button) => {
     button.classList.add("active");
     currentScene = button.dataset.scene;
     renderScene();
+  });
+});
+
+document.querySelectorAll("[data-performance-view]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-performance-view]").forEach((item) => item.classList.remove("active"));
+    button.classList.add("active");
+    renderScores();
   });
 });
 
