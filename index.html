@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 同传产品对比评测</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="hero" id="top">
+        <nav class="topbar" aria-label="页面导航">
+          <a class="brand" href="#top"><span>Benchmark</span> AI 同传评测</a>
+          <div class="nav-links">
+            <a href="#summary">结论</a>
+            <a href="#products">产品</a>
+            <a href="#performance">表现</a>
+            <a href="#scenarios">场景</a>
+            <a href="#method">方法</a>
+          </div>
+        </nav>
+
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">会议场景 & 通用场景 · 中英双向 Demo 评测</p>
+            <h1><span>AI 同传产品</span><span>对比评测</span></h1>
+            <div class="hero-meta" aria-label="评测日期">
+              <span>竞品评测完成：2026 年 4 月 20 日</span>
+              <span>腾讯会议数据更新：2026 年 5 月 22 日</span>
+            </div>
+            <p class="hero-lead">
+              覆盖飞书、钉钉、腾讯会议、Teams Copilot、Google Meet、讯飞同传、有道翻译官、腾讯元宝、百度 AI 同传 9 款产品，从字幕同传、语音同传、信息准确度、音色自然度、时延、价格和语对覆盖进行横向比较。
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="#performance">查看排行</a>
+              <a class="button ghost" href="#scenarios">查看场景评测</a>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      <main>
+        <section class="section summary-section" id="summary">
+          <div class="section-head">
+            <p class="eyebrow">Summary</p>
+            <h2>关键结论</h2>
+          </div>
+          <div class="summary-grid">
+            <article class="takeaway lead-card">
+              <h3>总体结论</h3>
+              <ul>
+                <li>在目前国内外市面上的 9 款 AI 同传产品中，飞书 AI 同传在信息准确度和音色自然度维度的表现都是最好的，平均时延也是最低的。</li>
+                <li>从覆盖语种来看，飞书的字幕同传和语音同传覆盖语对偏少：字幕同传 24 对，语音同传 2 对。</li>
+                <li>钉钉字幕同传覆盖语种最多，支持 79 对；讯飞同传语音同传覆盖语种最多，支持 15 对。</li>
+                <li>同为办公软件的钉钉，信息准确度略低于飞书，音色自然度尚可，字幕同传平均时延约 4 秒，语音同传平均时延高达 13 秒。</li>
+                <li>考虑价格因素，有道翻译官性价比最高，语音同传和字幕同传各维度表现均处于中等水平，价格低至 0.43 元/小时（按一个月 35 元 80 小时计算）。有道翻译官使用的是字节模型 API 能力。</li>
+              </ul>
+            </article>
+            <article class="takeaway update-card">
+              <h3>腾讯会议更新</h3>
+              <p>
+                2026 年 5 月 21 日，腾讯会议的 AI 同传正式上线，从仅支持字幕同传扩展到字幕同传 + 语音同传。5 月 22 日已更新腾讯会议评测数据。
+              </p>
+              <ul>
+                <li>仅支持中英两个语对，字幕同传和语音同传内容完全相同。</li>
+                <li>字幕同传和语音同传的平均时延分别为 4.75 秒和 6.37 秒，明显高于官方宣传的“同传时延低于 3 秒”。</li>
+                <li>信息准确度一般，低于飞书和钉钉。</li>
+                <li>支持音色克隆且还原度不错，但整体音质不稳定，偶尔会出现卡顿；英语中式口音较重，男女音色变化不自然。</li>
+              </ul>
+            </article>
+          </div>
+          <article class="background-card">
+            <h3>评测背景</h3>
+            <p>
+              为了更全面地了解外部 AI 同传产品能力，我们对包括字节飞书 AI 同传在内的 9 家国内外主流厂商已推出的 AI 同传产品开展了中英双向的 Demo 评测，并从 S2S 与 S2T 两种同传形态出发，整体评估各家产品在会议场景 & 通用场景中的 AI 同传能力。
+            </p>
+            <a href="https://bytedance.larkoffice.com/wiki/KhtxwQJS5inNbWkHcpZcLeqQnmc" target="_blank" rel="noreferrer">往期评测：AI 同传产品对比评测（会议场景 & 通用场景）260122</a>
+          </article>
+        </section>
+
+        <section class="section" id="products">
+          <div class="section-head split">
+            <div>
+              <p class="eyebrow">Products</p>
+              <h2>产品介绍</h2>
+              <p>按是否为办公应用排序。定价截图已归入对应产品，便于在同一上下文中比较入口、能力、价格和语对覆盖。</p>
+            </div>
+            <div class="controls">
+              <input id="productSearch" type="search" placeholder="搜索产品 / 入口 / 定价" />
+              <select id="capabilityFilter" aria-label="同传能力筛选">
+                <option value="all">全部能力</option>
+                <option value="voice">语音 + 字幕</option>
+                <option value="caption">仅字幕</option>
+              </select>
+            </div>
+          </div>
+          <div id="productGrid" class="product-grid"></div>
+        </section>
+
+        <section class="section performance-section" id="performance">
+          <div class="section-head">
+            <p class="eyebrow">Performance</p>
+            <h2>评测结论：多维度对比</h2>
+            <p>把准确度、音色、时延和音色克隆放到同一个矩阵中比较，颜色越深代表表现越好；时延维度按秒数反向计算，越低越好。</p>
+          </div>
+
+          <div class="dimension-summary" aria-label="各维度领先产品">
+            <article>
+              <span>准确度</span>
+              <strong>飞书 AI 同传</strong>
+              <p>字幕与语音准确度均为 5/5。</p>
+            </article>
+            <article>
+              <span>音色自然度</span>
+              <strong>飞书 AI 同传</strong>
+              <p>语音同传音色自然度为 5/5。</p>
+            </article>
+            <article>
+              <span>字幕时延</span>
+              <strong>飞书 AI 同传 · 2.675s</strong>
+              <p>腾讯元宝 2.87s 紧随其后。</p>
+            </article>
+            <article>
+              <span>语音时延</span>
+              <strong>飞书 AI 同传 · 3.215s</strong>
+              <p>有道翻译官 3.655s 排第二。</p>
+            </article>
+          </div>
+
+          <div class="matrix-card">
+            <div class="matrix-toolbar">
+              <h3>产品表现矩阵</h3>
+              <div class="matrix-legend">
+                <span><i class="legend-high"></i>强</span>
+                <span><i class="legend-mid"></i>中</span>
+                <span><i class="legend-low"></i>弱 / 不涉及</span>
+              </div>
+            </div>
+            <div id="performanceMatrix" class="performance-matrix"></div>
+          </div>
+        </section>
+
+        <section class="section" id="scenarios">
+          <div class="section-head split">
+            <div>
+              <p class="eyebrow">Scenarios</p>
+              <h2>竞品对比</h2>
+              <p>保留 Word 中的原始输入、音频文件名、每个产品的视频文件名和评测笔记。音频与视频先以占位卡片呈现。</p>
+            </div>
+            <div class="segmented scene-tabs" role="tablist" aria-label="场景切换">
+              <button class="active" type="button" data-scene="meeting">会议场景</button>
+              <button type="button" data-scene="general">通用场景</button>
+            </div>
+          </div>
+          <div class="input-panel">
+            <div class="card-title-row">
+              <h3 id="sceneTitle">会议场景输入</h3>
+            </div>
+            <div id="sceneInput" class="input-sources"></div>
+          </div>
+          <div id="sceneGrid" class="scene-grid"></div>
+        </section>
+
+        <section class="section method-section" id="method">
+          <div class="section-head">
+            <p class="eyebrow">Method</p>
+            <h2>评测说明</h2>
+          </div>
+          <div class="method-card">
+            <ol>
+              <li>同一套音频测试集（每次测试都使用同一套音频测试集）。</li>
+              <li>同一个网络环境（每次测试都使用同一个 Wi-Fi、同一地点）。</li>
+              <li>同一种输入方式（每次测试都使用同一个手机外放音频）。</li>
+              <li>全程录屏（每次测试都全程手机 / PC 录屏）。</li>
+            </ol>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>
